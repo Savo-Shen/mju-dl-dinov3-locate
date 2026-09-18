@@ -1,0 +1,20 @@
+[dog] 20580 images, gt bbox: True
+/opt/anaconda3/envs/fal-wyh/lib/python3.9/site-packages/torchvision/transforms/transforms.py:329: UserWarning: Argument 'interpolation' of type int is deprecated since 0.13 and will be removed in 0.15. Please use InterpolationMode enum.
+  warnings.warn(
+  32/20580  7s
+  1632/20580  31s
+  3232/20580  69s
+  4832/20580  116s
+  6432/20580  163s
+  8032/20580  210s
+  9632/20580  257s
+  11232/20580  303s
+  12832/20580  350s
+  14432/20580  397s
+  16032/20580  444s
+  17632/20580  491s
+  19232/20580  537s
+  IoU(auto, gt) train: mean 0.769  >=0.5 0.899  n=12000
+  IoU(auto, gt) test: mean 0.764  >=0.5 0.891  n=8580
+  IoU(auto, gt) all:   mean 0.767  >=0.5 0.896
+[dog] done 20580 images in 576s → /home/savo_shen/data_crops/dog

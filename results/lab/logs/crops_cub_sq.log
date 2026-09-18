@@ -1,0 +1,15 @@
+[cub] 11788 images, gt bbox: True
+/opt/anaconda3/envs/fal-wyh/lib/python3.9/site-packages/torchvision/transforms/transforms.py:329: UserWarning: Argument 'interpolation' of type int is deprecated since 0.13 and will be removed in 0.15. Please use InterpolationMode enum.
+  warnings.warn(
+  32/11788  6s
+  1632/11788  29s
+  3232/11788  51s
+  4832/11788  74s
+  6432/11788  97s
+  8032/11788  120s
+  9632/11788  143s
+  11232/11788  166s
+  IoU(auto, gt) train: mean 0.465  >=0.5 0.373  n=5994
+  IoU(auto, gt) test: mean 0.461  >=0.5 0.371  n=5794
+  IoU(auto, gt) all:   mean 0.463  >=0.5 0.372
+[cub] done 11788 images in 174s → /home/savo_shen/data_crops/cub

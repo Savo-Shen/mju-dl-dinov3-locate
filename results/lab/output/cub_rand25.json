@@ -1,0 +1,73 @@
+{
+ "name": "cub_rand25",
+ "data_root": "/home/savo_shen/data_crops/cub/raw",
+ "best": 0.8369002416292717,
+ "final": 0.8369002416292717,
+ "hist": [
+  [
+   1000,
+   0.701415257162582
+  ],
+  [
+   2000,
+   0.7656196064894719
+  ],
+  [
+   3000,
+   0.7906454953400069
+  ],
+  [
+   4000,
+   0.803589920607525
+  ],
+  [
+   5000,
+   0.8070417673455299
+  ],
+  [
+   6000,
+   0.8194684156023473
+  ],
+  [
+   7000,
+   0.8313772868484639
+  ],
+  [
+   8000,
+   0.8305143251639627
+  ],
+  [
+   9000,
+   0.8362098722816707
+  ],
+  [
+   10000,
+   0.8369002416292717
+  ]
+ ],
+ "tokens": [
+  196,
+  784
+ ],
+ "args": {
+  "data_root": "/home/savo_shen/data_crops/cub/raw",
+  "name": "cub_rand25",
+  "output_dir": "output",
+  "pretrained": "/home/savo_shen/Programs/FAL-ViT-main-wyh/imagenet21k_ViT-B_16.npz",
+  "img_size": 448,
+  "select": "random",
+  "keep": 0.25,
+  "sel_img": 448,
+  "train_batch_size": 16,
+  "grad_accum": 1,
+  "eval_batch_size": 64,
+  "learning_rate": 0.03,
+  "weight_decay": 0.0,
+  "num_steps": 10000,
+  "warmup_steps": 500,
+  "eval_every": 1000,
+  "max_grad_norm": 1.0,
+  "num_workers": 8,
+  "seed": 42
+ }
+}

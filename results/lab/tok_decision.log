@@ -1,0 +1,21 @@
+=== cub_tok25 on GPU0 start 2026年 09月 16日 星期三 19:32:42 CST ===
+09/16/2026 20:32:12 - INFO - __main__ - Best Accuracy: 	0.900932
+smoke cub_tok25 best=0.9009319986192613 (raw 0.9068; threshold 0.885)
+DECISION: effective → full token-selection set
+=== cub_tok50 on GPU0 start 2026年 09月 16日 星期三 20:32:14 CST ===
+09/16/2026 21:43:43 - INFO - __main__ - Best Accuracy: 	0.906282
+=== cub_tok10 on GPU0 start 2026年 09月 16日 星期三 21:43:45 CST ===
+09/16/2026 22:38:59 - INFO - __main__ - Best Accuracy: 	0.887297
+=== cub_rand25 on GPU0 start 2026年 09月 16日 星期三 22:39:01 CST ===
+09/16/2026 22:58:18 - INFO - __main__ - Best Accuracy: 	0.836900
+=== cub_tok25_896 on GPU1 start 2026年 09月 16日 星期三 23:56:22 CST ===
+09/17/2026 01:47:36 - INFO - __main__ - Best Accuracy: 	0.902658
+=== nabirds_tok25 on GPU1 start 2026年 09月 17日 星期四 01:47:39 CST ===
+09/17/2026 03:32:16 - INFO - __main__ - Best Accuracy: 	0.893963
+=== nabirds_rand25 on GPU1 start 2026年 09月 17日 星期四 03:32:18 CST ===
+09/17/2026 03:55:35 - INFO - __main__ - Best Accuracy: 	0.764300
+=== nabirds_tok25_896 on GPU1 start 2026年 09月 17日 星期四 03:55:37 CST ===
+09/17/2026 06:49:23 - INFO - __main__ - Best Accuracy: 	0.905127
+=== nabirds_tok10 on GPU1 start 2026年 09月 17日 星期四 06:49:27 CST ===
+09/17/2026 08:26:55 - INFO - __main__ - Best Accuracy: 	0.876345
+=== tok queue ALL DONE 2026年 09月 17日 星期四 08:26:58 CST ===

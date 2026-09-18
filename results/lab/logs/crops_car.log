@@ -1,0 +1,18 @@
+[car] 16185 images, gt bbox: True
+/opt/anaconda3/envs/fal-wyh/lib/python3.9/site-packages/torchvision/transforms/transforms.py:329: UserWarning: Argument 'interpolation' of type int is deprecated since 0.13 and will be removed in 0.15. Please use InterpolationMode enum.
+  warnings.warn(
+  32/16185  11s
+  1632/16185  56s
+  3232/16185  103s
+  4832/16185  150s
+  6432/16185  197s
+  8032/16185  246s
+  9632/16185  294s
+  11232/16185  342s
+  12832/16185  389s
+  14432/16185  437s
+  16032/16185  485s
+  IoU(auto, gt) train: mean 0.800  >=0.5 0.977  n=8144
+  IoU(auto, gt) test: mean 0.802  >=0.5 0.979  n=8041
+  IoU(auto, gt) all:   mean 0.801  >=0.5 0.978
+[car] done 16185 images in 490s → /home/savo_shen/data_crops/car

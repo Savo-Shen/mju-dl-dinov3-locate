@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>冻结 ViT 在看什么</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --panel: #fff; --line: #e4e4e0; --text: #1c1c1a; --muted: #6b6b66;
+    --primary: #2f5fd1; --warn: #c9502e; --ok: #2b8a5a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.55 -apple-system, "PingFang SC", "Noto Sans SC", sans-serif; }
+  header { padding: 22px 32px 10px; display: flex; align-items: baseline; gap: 14px; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 650; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  #status { margin-left: auto; font-size: 12px; color: var(--muted); }
+  #status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+                 background: #d0a000; margin-right: 6px; vertical-align: middle; }
+  #status.ready .dot { background: var(--ok); }
+  #status.error .dot { background: var(--warn); }
+
+  main { display: grid; grid-template-columns: 300px 1fr; gap: 20px; padding: 10px 32px 40px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .panel h2 { margin: 0 0 10px; font-size: 13px; font-weight: 600; color: var(--muted);
+              letter-spacing: .04em; text-transform: uppercase; }
+
+  #drop { border: 1.5px dashed #c8c8c2; border-radius: 8px; padding: 22px 12px; text-align: center;
+          color: var(--muted); cursor: pointer; transition: .15s; }
+  #drop.over { border-color: var(--primary); background: #eef3ff; color: var(--primary); }
+  #drop img { max-width: 100%; max-height: 220px; border-radius: 6px; display: block; margin: 0 auto 8px; }
+  #file { display: none; }
+
+  .row { margin: 14px 0 0; }
+  .row label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .chk { display: flex; flex-direction: column; gap: 6px; }
+  .chk label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); margin: 0; }
+  .chk small { color: var(--muted); }
+  input[type=range] { width: 100%; }
+  #gridv { font-variant-numeric: tabular-nums; color: var(--text); }
+
+  button.go { width: 100%; margin-top: 16px; padding: 10px; border: 0; border-radius: 8px;
+              background: var(--primary); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+  button.go:disabled { background: #b9c4e3; cursor: not-allowed; }
+
+  .samples { display: flex; flex-wrap: wrap; gap: 6px; }
+  .samples button { border: 1px solid var(--line); background: #fafaf8; border-radius: 6px;
+                    padding: 4px 9px; font-size: 12px; cursor: pointer; color: var(--text); }
+  .samples button:hover { border-color: var(--primary); color: var(--primary); }
+
+  #results { min-height: 400px; }
+  #results .empty { color: var(--muted); text-align: center; padding: 120px 0; }
+  .grid { display: grid; gap: 14px; }
+  .col { display: flex; flex-direction: column; gap: 8px; }
+  .col h3 { margin: 0; font-size: 13px; font-weight: 600; }
+  .col h3 small { display: block; color: var(--muted); font-weight: 400; font-size: 11px; }
+  .col img { width: 100%; aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--line);
+             image-rendering: pixelated; background: #eee; }
+  .col .cap { font-size: 11px; color: var(--muted); margin-top: -4px; }
+  .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .m { background: #fafaf8; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+  .m b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .m span { font-size: 10.5px; color: var(--muted); }
+  .m.best { border-color: var(--ok); background: #eef8f2; }
+  .note { margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .err { color: var(--warn); padding: 12px; background: #fff3ef; border-radius: 8px; }
+
+  /* 说明 */
+  #help-btn { margin-left: 14px; border: 1px solid var(--line); background: #fff; border-radius: 6px;
+              padding: 3px 10px; font-size: 12px; cursor: pointer; color: var(--primary); }
+  #help-btn:hover { border-color: var(--primary); }
+  dialog { border: 0; border-radius: 12px; padding: 0; max-width: 720px; width: 92vw;
+           box-shadow: 0 20px 60px rgba(0,0,0,.18); }
+  dialog::backdrop { background: rgba(20,20,20,.35); }
+  .help { padding: 22px 26px 26px; font-size: 13.5px; line-height: 1.7; max-height: 82vh; overflow: auto; }
+  .help h2 { margin: 0 0 4px; font-size: 17px; text-transform: none; letter-spacing: 0; color: var(--text); }
+  .help h3 { margin: 18px 0 6px; font-size: 14px; color: var(--primary); }
+  .help p { margin: 6px 0; }
+  .help ol, .help ul { margin: 4px 0 6px 1.2em; padding: 0; }
+  .help li { margin: 3px 0; }
+  .help .one { background: #eef3ff; border-left: 3px solid var(--primary); padding: 8px 12px; border-radius: 6px; margin: 8px 0; }
+  .help .no  { background: #fff3ef; border-left: 3px solid var(--warn);    padding: 8px 12px; border-radius: 6px; margin: 8px 0; }
+  .help table { border-collapse: collapse; font-size: 12.5px; margin: 6px 0; }
+  .help th, .help td { border: 1px solid var(--line); padding: 4px 10px; text-align: left; vertical-align: top; }
+  .help th { background: #fafaf8; }
+  .help .close { float: right; border: 0; background: transparent; font-size: 18px; cursor: pointer; color: var(--muted); }
+  .note a { color: var(--primary); cursor: pointer; }
+</style>
+</head>
+<body>
+<header>
+  <h1>冻结的 ViT，在看主体还是在看背景？</h1>
+  <span class="sub">DINOv2 · DINOv2+reg · DINOv3 的 patch 特征并排对比</span>
+  <button id="help-btn" onclick="document.getElementById('help').showModal()">怎么看这些图？</button>
+  <span id="status"><span class="dot"></span><span id="status-text">连接中…</span></span>
+</header>
+
+<main>
+  <aside class="panel">
+    <h2>输入</h2>
+    <div id="drop">
+      <input id="file" type="file" accept="image/*">
+      <div id="drop-hint">拖一张图进来，或点击选择</div>
+    </div>
+
+    <div class="row">
+      <label>示例图</label>
+      <div class="samples" id="samples"></div>
+    </div>
+
+    <div class="row">
+      <label>模型</label>
+      <div class="chk">
+        <label><input type="checkbox" name="m" value="dinov2" checked> DINOv2 <small>无 register</small></label>
+        <label><input type="checkbox" name="m" value="dinov2_reg4" checked> DINOv2 + reg4 <small>对照组</small></label>
+        <label><input type="checkbox" name="m" value="dinov3" checked> DINOv3 <small>reg + Gram anchoring</small></label>
+      </div>
+    </div>
+
+    <div class="row">
+      <label>patch 网格 <span id="gridv">32 × 32</span></label>
+      <input id="grid" type="range" min="16" max="40" step="4" value="32">
+    </div>
+
+    <button class="go" id="go" disabled>分析</button>
+  </aside>
+
+  <section class="panel" id="results">
+    <div class="empty">选一张图，看三个模型各自「看到」了什么</div>
+  </section>
+</main>
+
+<dialog id="help">
+<div class="help">
+  <button class="close" onclick="document.getElementById('help').close()">✕</button>
+  <h2>怎么看这些图</h2>
+  <p style="color:var(--muted)">ViT 把图切成 N×N 个小方块（patch），每块输出一个 384 维向量，意思是「这一块是什么」。下面两张图都是从这些向量算出来的。</p>
+
+  <h3>彩色图：模型给每一小块打的「标签」</h3>
+  <p>384 维画不出来，用 PCA 找方差最大的 3 个方向当 R、G、B。</p>
+  <div class="one"><b>读法只有一条：颜色相近 = 特征相近 = 模型认为这两块是同一类东西。</b></div>
+  <ul>
+    <li>颜色本身没意义——每个模型自己做 PCA，DINOv2 的紫和 DINOv3 的绿<b>不能对着比</b>。要看的是<b>边界干不干净、同一物体内部颜色统不统一</b>。</li>
+    <li>背景里的椒盐碎点 = 相邻两块明明是同一个东西，特征却差很多。这就是「邻域相似度」低在图上的样子。</li>
+  </ul>
+
+  <h3>黑白图：模型自己圈出的「主体」</h3>
+  <div class="one"><b>白色 = 在模型特征看来自身最一致、和其余部分最不像、又不贴着画面边缘的那一团。</b>全程没有任何标注，它没被告诉过「人」「鸟」是什么。</div>
+  <p>算法叫 Normalized Cut（Shi &amp; Malik 2000；用在 DINO 特征上是 TokenCut, CVPR 2022），四步：</p>
+  <ol>
+    <li><b>连成一张网</b>：每个 patch 是一个点，任意两点之间连边，边的粗细 = 特征余弦相似度。同一个物体内部连得密，物体之间连得稀。</li>
+    <li><b>一刀切两半</b>：找一条线把点分成两组，切断的边越细越好。</li>
+    <li><b>归一化惩罚小块</b>：光看切断多少会切出孤零零一个角落。改看「切断的 ÷ 各组自己的总连接」——小块分母小、比值大，被惩罚。所以赢的不是面积最大的，是<b>分得最干净、又不至于小到没意义</b>的。</li>
+    <li><b>哪边是前景</b>：切出的两组是对称的，用一个先验挑：主体一般不占满四条边，<b>碰边界少的那组</b>算前景。</li>
+  </ol>
+  <p>第 2 步精确解是 NP-hard，实际解的是特征值问题 (D − W)v = λDv，取第二小特征值的向量（Fiedler 向量），符号就是分组。直觉：把网当弹簧，粗边硬、细边软，它找的是最软的那条缝。</p>
+
+  <h3>为什么不圈别的区域</h3>
+  <p>NCut 只切<b>一刀</b>，找的是全图最松的一条缝。想把画面里第二个物体也单独圈出来，要在切完后对每一半再切（递归 NCut），或者换 SAM 那种给点就出 mask 的方法。</p>
+
+  <h3>数字</h3>
+  <table>
+    <tr><th>邻域相似度</th><td>每个 patch 和上下左右邻居的平均余弦相似度。越高特征越平滑，彩色图里碎点越少。</td></tr>
+    <tr><th>cos 相似度中位数</th><td>全图 patch 两两有多像。DINOv2 ≈ 0.2、DINOv3 ≈ 0.6，差三倍——所以 NCut 的阈值必须按每张图自适应（取中位数），固定 0.2 会让 DINOv3 的网全连通、切不开。</td></tr>
+    <tr><th>前景占比</th><td>白色块占全图比例。主体大小的合理性检查：一只小鸟占 60% 肯定是切错了。</td></tr>
+  </table>
+
+  <h3>三个常见误读</h3>
+  <div class="no">
+    <b>不是「DINO 认为这块是主体」。</b>DINO 只提供「谁和谁像」这张网，圈哪块是 NCut 决定的。<br>
+    <b>不是「最特别的」。</b>NCut 只衡量分离度和内聚度，不衡量新奇或重要；一片纯色的墙一样能被圈出来。<br>
+    <b>不是「面积最大的」。</b>面积只在归一化里起作用，用来惩罚太小的块。
+  </div>
+
+  <h3>局限</h3>
+  <ul>
+    <li>只切两块：多个物体会合并（人 + 椅子）或只留一个。</li>
+    <li>小目标吃亏：patch 太少，内部「密」得不够。</li>
+    <li>特征分解 O(n³)：32×32 = 1024 点 0.1 秒；网格拉太大就慢了。</li>
+  </ul>
+</div>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+let currentFile = null;
+
+// ---------- 状态轮询
+async function poll() {
+  try {
+    const s = await (await fetch('/api/status')).json();
+    const el = $('#status');
+    if (s.error) { el.className = 'error'; $('#status-text').textContent = '加载失败：' + s.error; return; }
+    if (s.ready) { el.className = 'ready'; $('#status-text').textContent = `就绪 · ${s.device}`; updateGo(); return; }
+    $('#status-text').textContent = `加载模型 ${s.loading || ''}…`;
+  } catch { $('#status-text').textContent = '后端未响应'; }
+  setTimeout(poll, 800);
+}
+poll();
+
+// ---------- 示例图
+(async () => {
+  const list = await (await fetch('/api/samples')).json();
+  const box = $('#samples');
+  if (!list.length) { box.innerHTML = '<small style="color:#999">experiments/data 下没有图片</small>'; return; }
+  for (const s of list) {
+    const b = document.createElement('button');
+    b.textContent = s.name.replace(/_.*$/, '');
+    b.onclick = async () => {
+      const blob = await (await fetch(s.url)).blob();
+      setFile(new File([blob], s.name + '.jpg', { type: blob.type }));
+    };
+    box.appendChild(b);
+  }
+})();
+
+// ---------- 上传
+const drop = $('#drop'), fileIn = $('#file');
+drop.onclick = () => fileIn.click();
+fileIn.onchange = () => fileIn.files[0] && setFile(fileIn.files[0]);
+['dragenter', 'dragover'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', ev => ev.dataTransfer.files[0] && setFile(ev.dataTransfer.files[0]));
+document.addEventListener('paste', ev => {
+  const f = [...(ev.clipboardData?.files || [])].find(f => f.type.startsWith('image/'));
+  if (f) setFile(f);
+});
+
+function setFile(f) {
+  currentFile = f;
+  const url = URL.createObjectURL(f);
+  drop.innerHTML = `<img src="${url}"><div style="font-size:12px">${f.name}</div>`;
+  updateGo();
+}
+function updateGo() { $('#go').disabled = !(currentFile && $('#status').classList.contains('ready')); }
+
+$('#grid').oninput = e => $('#gridv').textContent = `${e.target.value} × ${e.target.value}`;
+
+// ---------- 分析
+$('#go').onclick = async () => {
+  const keys = [...document.querySelectorAll('input[name=m]:checked')].map(i => i.value);
+  if (!keys.length) return alert('至少选一个模型');
+  const fd = new FormData();
+  fd.append('file', currentFile);
+  fd.append('models', keys.join(','));
+  fd.append('grid', $('#grid').value);
+
+  $('#go').disabled = true; $('#go').textContent = '推理中…';
+  $('#results').innerHTML = '<div class="empty">推理中…</div>';
+  try {
+    const r = await fetch('/api/analyze', { method: 'POST', body: fd });
+    if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+    render(await r.json());
+  } catch (e) {
+    $('#results').innerHTML = `<div class="err">${e.message}</div>`;
+  } finally {
+    $('#go').disabled = false; $('#go').textContent = '分析';
+  }
+};
+
+const LABEL = { dinov2: 'DINOv2', dinov2_reg4: 'DINOv2 + reg4', dinov3: 'DINOv3' };
+
+function render(d) {
+  const n = d.models.length;
+  const bestSmooth = Math.max(...d.models.map(m => m.smooth));
+  const cols = d.models.map(m => `
+    <div class="col">
+      <h3>${LABEL[m.key]}<small>${m.name} · ${m.input_px}px / patch${m.patch} · ${m.ms} ms</small></h3>
+      <img src="${m.pca}" alt="PCA">
+      <div class="cap" title="颜色相近 = 特征相近；颜色本身无意义，不可跨模型比">前三主成分 → RGB</div>
+      <img src="${m.mask}" alt="mask">
+      <div class="cap" title="白 = 自身最一致、和其余最不像、不贴边缘的那一团；无标注">NCut 前景 mask · 前景占 ${(m.fg_ratio*100).toFixed(0)}%</div>
+      <div class="metrics">
+        <div class="m ${m.smooth===bestSmooth?'best':''}"><b>${m.smooth.toFixed(3)}</b><span>邻域相似度 ↑</span></div>
+        <div class="m"><b>${m.cos_med.toFixed(2)}</b><span>cos 相似度中位数</span></div>
+        <div class="m"><b>${d.grid}²</b><span>patch 数</span></div>
+      </div>
+    </div>`).join('');
+  $('#results').innerHTML = `
+    <div class="grid" style="grid-template-columns: 200px repeat(${n}, 1fr)">
+      <div class="col">
+        <h3>原图<small>送入网络前统一缩放为正方形</small></h3>
+        <img src="${d.original}" style="image-rendering:auto">
+      </div>
+      ${cols}
+    </div>
+    <div class="note">
+      <b>怎么看：</b>PCA 图里颜色相近的 patch 特征相近；背景里的椒盐噪点说明相邻 patch 特征不一致，对应「邻域相似度」低。
+      「cos 相似度中位数」是全图 patch 两两有多像——DINOv3 比 DINOv2 高三倍，所以 mask 用的 NCut 阈值必须按每张图自适应。
+      mask 是不看任何标注、只在 patch 相似度图上做 Normalized Cut 切出来的前景——它对不对，就是「模型在看主体还是背景」的直接证据。
+      绿色高亮 = 该指标在本次对比中最好。
+    </div>`;
+}
+</script>
+</body>
+</html>

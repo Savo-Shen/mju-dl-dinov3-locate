@@ -1,0 +1,66 @@
+{
+ "name": "dog_raw",
+ "data_root": "/home/savo_shen/data_crops/dog/raw",
+ "best": 0.9043123543123543,
+ "final": 0.9043123543123543,
+ "hist": [
+  [
+   1000,
+   0.8646853146853147
+  ],
+  [
+   2000,
+   0.884032634032634
+  ],
+  [
+   3000,
+   0.8726107226107226
+  ],
+  [
+   4000,
+   0.8621212121212121
+  ],
+  [
+   5000,
+   0.8869463869463869
+  ],
+  [
+   6000,
+   0.8924242424242425
+  ],
+  [
+   7000,
+   0.899067599067599
+  ],
+  [
+   8000,
+   0.9011655011655012
+  ],
+  [
+   9000,
+   0.9037296037296038
+  ],
+  [
+   10000,
+   0.9043123543123543
+  ]
+ ],
+ "args": {
+  "data_root": "/home/savo_shen/data_crops/dog/raw",
+  "name": "dog_raw",
+  "output_dir": "output",
+  "pretrained": "/home/savo_shen/Programs/FAL-ViT-main-wyh/imagenet21k_ViT-B_16.npz",
+  "img_size": 448,
+  "train_batch_size": 16,
+  "grad_accum": 1,
+  "eval_batch_size": 64,
+  "learning_rate": 0.03,
+  "weight_decay": 0.0,
+  "num_steps": 10000,
+  "warmup_steps": 500,
+  "eval_every": 1000,
+  "max_grad_norm": 1.0,
+  "num_workers": 8,
+  "seed": 42
+ }
+}

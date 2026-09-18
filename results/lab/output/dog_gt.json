@@ -1,0 +1,66 @@
+{
+ "name": "dog_gt",
+ "data_root": "/home/savo_shen/data_crops/dog/gt",
+ "best": 0.8882284382284382,
+ "final": 0.8882284382284382,
+ "hist": [
+  [
+   1000,
+   0.8222610722610723
+  ],
+  [
+   2000,
+   0.8502331002331003
+  ],
+  [
+   3000,
+   0.8668997668997669
+  ],
+  [
+   4000,
+   0.8513986013986014
+  ],
+  [
+   5000,
+   0.8643356643356643
+  ],
+  [
+   6000,
+   0.8736596736596737
+  ],
+  [
+   7000,
+   0.8814685314685314
+  ],
+  [
+   8000,
+   0.8862470862470863
+  ],
+  [
+   9000,
+   0.8881118881118881
+  ],
+  [
+   10000,
+   0.8882284382284382
+  ]
+ ],
+ "args": {
+  "data_root": "/home/savo_shen/data_crops/dog/gt",
+  "name": "dog_gt",
+  "output_dir": "output",
+  "pretrained": "/home/savo_shen/Programs/FAL-ViT-main-wyh/imagenet21k_ViT-B_16.npz",
+  "img_size": 448,
+  "train_batch_size": 16,
+  "grad_accum": 1,
+  "eval_batch_size": 64,
+  "learning_rate": 0.03,
+  "weight_decay": 0.0,
+  "num_steps": 10000,
+  "warmup_steps": 500,
+  "eval_every": 1000,
+  "max_grad_norm": 1.0,
+  "num_workers": 8,
+  "seed": 42
+ }
+}

@@ -1,0 +1,66 @@
+{
+ "name": "ip102_dinov3_sq",
+ "data_root": "/home/savo_shen/data_crops/ip102/dinov3_sq",
+ "best": 0.7341173349838631,
+ "final": 0.7341173349838631,
+ "hist": [
+  [
+   1000,
+   0.5579822273310049
+  ],
+  [
+   2000,
+   0.6295150095052832
+  ],
+  [
+   3000,
+   0.6642645563464344
+  ],
+  [
+   4000,
+   0.6807993279985852
+  ],
+  [
+   5000,
+   0.7017551615898139
+  ],
+  [
+   6000,
+   0.7112162341394402
+  ],
+  [
+   7000,
+   0.7218709934126177
+  ],
+  [
+   8000,
+   0.7308899597683364
+  ],
+  [
+   9000,
+   0.7331004907378752
+  ],
+  [
+   10000,
+   0.7341173349838631
+  ]
+ ],
+ "args": {
+  "data_root": "/home/savo_shen/data_crops/ip102/dinov3_sq",
+  "name": "ip102_dinov3_sq",
+  "output_dir": "output",
+  "pretrained": "/home/savo_shen/Programs/FAL-ViT-main-wyh/imagenet21k_ViT-B_16.npz",
+  "img_size": 448,
+  "train_batch_size": 16,
+  "grad_accum": 1,
+  "eval_batch_size": 64,
+  "learning_rate": 0.03,
+  "weight_decay": 0.0,
+  "num_steps": 10000,
+  "warmup_steps": 500,
+  "eval_every": 1000,
+  "max_grad_norm": 1.0,
+  "num_workers": 8,
+  "seed": 42
+ }
+}

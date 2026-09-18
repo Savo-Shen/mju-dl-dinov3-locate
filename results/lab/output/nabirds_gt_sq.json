@@ -1,0 +1,66 @@
+{
+ "name": "nabirds_gt_sq",
+ "data_root": "/home/savo_shen/data_crops/nabirds/gt_sq",
+ "best": 0.9104859335038363,
+ "final": 0.9100393780700686,
+ "hist": [
+  [
+   1000,
+   0.6789672390695408
+  ],
+  [
+   2000,
+   0.810538708236918
+  ],
+  [
+   3000,
+   0.8518653838346933
+  ],
+  [
+   4000,
+   0.8730564689643974
+  ],
+  [
+   5000,
+   0.8810538708236918
+  ],
+  [
+   6000,
+   0.8948564933219665
+  ],
+  [
+   7000,
+   0.903462834409126
+  ],
+  [
+   8000,
+   0.907928388746803
+  ],
+  [
+   9000,
+   0.9104859335038363
+  ],
+  [
+   10000,
+   0.9100393780700686
+  ]
+ ],
+ "args": {
+  "data_root": "/home/savo_shen/data_crops/nabirds/gt_sq",
+  "name": "nabirds_gt_sq",
+  "output_dir": "output",
+  "pretrained": "/home/savo_shen/Programs/FAL-ViT-main-wyh/imagenet21k_ViT-B_16.npz",
+  "img_size": 448,
+  "train_batch_size": 16,
+  "grad_accum": 1,
+  "eval_batch_size": 64,
+  "learning_rate": 0.03,
+  "weight_decay": 0.0,
+  "num_steps": 10000,
+  "warmup_steps": 500,
+  "eval_every": 1000,
+  "max_grad_norm": 1.0,
+  "num_workers": 8,
+  "seed": 42
+ }
+}

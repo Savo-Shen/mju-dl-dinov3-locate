@@ -1,0 +1,13 @@
+# 主实验 + Demo + 前置实验共用；torch / torchvision 请按 CUDA 版本先单独安装
+timm>=1.0.20          # DINOv3 backbone 从 1.0.20 起支持
+numpy
+scipy
+pillow
+ml_collections        # third_party/vit_pytorch 的配置对象
+pandas
+scikit-learn
+matplotlib
+joblib
+fastapi               # 以下三项只有 Web Demo 用
+uvicorn
+python-multipart

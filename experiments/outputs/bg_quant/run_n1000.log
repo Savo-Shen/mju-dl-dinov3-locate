@@ -1,0 +1,57 @@
+设备 mps · 1000 张 · 网格 32x32
+算协变量 ...
+  [dinov2] 16/1000  [dinov2] 32/1000  [dinov2] 48/1000  [dinov2] 64/1000  [dinov2] 80/1000  [dinov2] 96/1000  [dinov2] 112/1000  [dinov2] 128/1000  [dinov2] 144/1000  [dinov2] 160/1000  [dinov2] 176/1000  [dinov2] 192/1000  [dinov2] 208/1000  [dinov2] 224/1000  [dinov2] 240/1000  [dinov2] 256/1000  [dinov2] 272/1000  [dinov2] 288/1000  [dinov2] 304/1000  [dinov2] 320/1000  [dinov2] 336/1000  [dinov2] 352/1000  [dinov2] 368/1000  [dinov2] 384/1000  [dinov2] 400/1000  [dinov2] 416/1000  [dinov2] 432/1000  [dinov2] 448/1000  [dinov2] 464/1000  [dinov2] 480/1000  [dinov2] 496/1000  [dinov2] 512/1000  [dinov2] 528/1000  [dinov2] 544/1000  [dinov2] 560/1000  [dinov2] 576/1000  [dinov2] 592/1000  [dinov2] 608/1000  [dinov2] 624/1000  [dinov2] 640/1000  [dinov2] 656/1000  [dinov2] 672/1000  [dinov2] 688/1000  [dinov2] 704/1000  [dinov2] 720/1000  [dinov2] 736/1000  [dinov2] 752/1000  [dinov2] 768/1000  [dinov2] 784/1000  [dinov2] 800/1000  [dinov2] 816/1000  [dinov2] 832/1000  [dinov2] 848/1000  [dinov2] 864/1000  [dinov2] 880/1000  [dinov2] 896/1000  [dinov2] 912/1000  [dinov2] 928/1000  [dinov2] 944/1000  [dinov2] 960/1000  [dinov2] 976/1000  [dinov2] 992/1000  [dinov2] 1000/1000  [dinov2] done · 输入 448px · patch14          
+  [dinov2_reg4] 16/1000  [dinov2_reg4] 32/1000  [dinov2_reg4] 48/1000  [dinov2_reg4] 64/1000  [dinov2_reg4] 80/1000  [dinov2_reg4] 96/1000  [dinov2_reg4] 112/1000  [dinov2_reg4] 128/1000  [dinov2_reg4] 144/1000  [dinov2_reg4] 160/1000  [dinov2_reg4] 176/1000  [dinov2_reg4] 192/1000  [dinov2_reg4] 208/1000  [dinov2_reg4] 224/1000  [dinov2_reg4] 240/1000  [dinov2_reg4] 256/1000  [dinov2_reg4] 272/1000  [dinov2_reg4] 288/1000  [dinov2_reg4] 304/1000  [dinov2_reg4] 320/1000  [dinov2_reg4] 336/1000  [dinov2_reg4] 352/1000  [dinov2_reg4] 368/1000  [dinov2_reg4] 384/1000  [dinov2_reg4] 400/1000  [dinov2_reg4] 416/1000  [dinov2_reg4] 432/1000  [dinov2_reg4] 448/1000  [dinov2_reg4] 464/1000  [dinov2_reg4] 480/1000  [dinov2_reg4] 496/1000  [dinov2_reg4] 512/1000  [dinov2_reg4] 528/1000  [dinov2_reg4] 544/1000  [dinov2_reg4] 560/1000  [dinov2_reg4] 576/1000  [dinov2_reg4] 592/1000  [dinov2_reg4] 608/1000  [dinov2_reg4] 624/1000  [dinov2_reg4] 640/1000  [dinov2_reg4] 656/1000  [dinov2_reg4] 672/1000  [dinov2_reg4] 688/1000  [dinov2_reg4] 704/1000  [dinov2_reg4] 720/1000  [dinov2_reg4] 736/1000  [dinov2_reg4] 752/1000  [dinov2_reg4] 768/1000  [dinov2_reg4] 784/1000  [dinov2_reg4] 800/1000  [dinov2_reg4] 816/1000  [dinov2_reg4] 832/1000  [dinov2_reg4] 848/1000  [dinov2_reg4] 864/1000  [dinov2_reg4] 880/1000  [dinov2_reg4] 896/1000  [dinov2_reg4] 912/1000  [dinov2_reg4] 928/1000  [dinov2_reg4] 944/1000  [dinov2_reg4] 960/1000  [dinov2_reg4] 976/1000  [dinov2_reg4] 992/1000  [dinov2_reg4] 1000/1000  [dinov2_reg4] done · 输入 448px · patch14          
+  [dinov3] 16/1000  [dinov3] 32/1000  [dinov3] 48/1000  [dinov3] 64/1000  [dinov3] 80/1000  [dinov3] 96/1000  [dinov3] 112/1000  [dinov3] 128/1000  [dinov3] 144/1000  [dinov3] 160/1000  [dinov3] 176/1000  [dinov3] 192/1000  [dinov3] 208/1000  [dinov3] 224/1000  [dinov3] 240/1000  [dinov3] 256/1000  [dinov3] 272/1000  [dinov3] 288/1000  [dinov3] 304/1000  [dinov3] 320/1000  [dinov3] 336/1000  [dinov3] 352/1000  [dinov3] 368/1000  [dinov3] 384/1000  [dinov3] 400/1000  [dinov3] 416/1000  [dinov3] 432/1000  [dinov3] 448/1000  [dinov3] 464/1000  [dinov3] 480/1000  [dinov3] 496/1000  [dinov3] 512/1000  [dinov3] 528/1000  [dinov3] 544/1000  [dinov3] 560/1000  [dinov3] 576/1000  [dinov3] 592/1000  [dinov3] 608/1000  [dinov3] 624/1000  [dinov3] 640/1000  [dinov3] 656/1000  [dinov3] 672/1000  [dinov3] 688/1000  [dinov3] 704/1000  [dinov3] 720/1000  [dinov3] 736/1000  [dinov3] 752/1000  [dinov3] 768/1000  [dinov3] 784/1000  [dinov3] 800/1000  [dinov3] 816/1000  [dinov3] 832/1000  [dinov3] 848/1000  [dinov3] 864/1000  [dinov3] 880/1000  [dinov3] 896/1000  [dinov3] 912/1000  [dinov3] 928/1000  [dinov3] 944/1000  [dinov3] 960/1000  [dinov3] 976/1000  [dinov3] 992/1000  [dinov3] 1000/1000/Users/savo_shen/Projects/dinov3/experiments/scripts/bg_quant.py:221: UserWarning: Glyph 26434 (\N{CJK UNIFIED IDEOGRAPH-6742}) missing from font(s) PingFang HK.
+  fig.tight_layout()
+/Users/savo_shen/Projects/dinov3/experiments/scripts/bg_quant.py:222: UserWarning: Glyph 26434 (\N{CJK UNIFIED IDEOGRAPH-6742}) missing from font(s) PingFang HK.
+  fig.savefig(out, dpi=160)
+  [dinov3] done · 输入 512px · patch16          
+逐图结果 /Users/savo_shen/Projects/dinov3/experiments/outputs/bg_quant/per_image_n1000_seed0.csv
+## 总体（均值 [95% bootstrap CI]）
+
+| 模型 | IoU (NCut) ↑ | IoU (PC1) ↑ | 平滑度 ↑ | artifact 比例 ↓ |
+|---|---|---|---|---|
+| dinov2 | 0.560 [0.549, 0.572] | 0.308 [0.292, 0.325] | 0.784 [0.782, 0.787] | 0.008 [0.007, 0.008] |
+| dinov2_reg4 | 0.549 [0.538, 0.561] | 0.360 [0.342, 0.378] | 0.830 [0.828, 0.833] | 0.023 [0.021, 0.025] |
+| dinov3 | 0.681 [0.665, 0.696] | 0.357 [0.335, 0.377] | 0.949 [0.948, 0.950] | 0.001 [0.000, 0.001] |
+
+## 配对检验（Wilcoxon，同一批图）
+
+| 对比 | 指标 | 差值均值 | p 值 | 更好的一方 |
+|---|---|---|---|---|
+| dinov2 → dinov2_reg4 | iou | -0.0110 | 2.98e-19 | dinov2 |
+| dinov2 → dinov2_reg4 | smooth | +0.0461 | 3.35e-165 | dinov2_reg4 |
+| dinov2 → dinov2_reg4 | artifact | +0.0154 | 1.97e-35 | dinov2 |
+| dinov2_reg4 → dinov3 | iou | +0.1320 | 5.19e-89 | dinov3 |
+| dinov2_reg4 → dinov3 | smooth | +0.1189 | 3.33e-165 | dinov3 |
+| dinov2_reg4 → dinov3 | artifact | -0.0226 | 1.17e-103 | dinov3 |
+| dinov2 → dinov3 | iou | +0.1210 | 1.01e-88 | dinov3 |
+| dinov2 → dinov3 | smooth | +0.1650 | 3.33e-165 | dinov3 |
+| dinov2 → dinov3 | artifact | -0.0072 | 3.11e-115 | dinov3 |
+
+## 按背景杂乱度分层（三等分）
+
+| 杂乱度 | n | dinov2 IoU | dinov2_reg4 IoU | dinov3 IoU | v3 − v2 | v3 − v2reg4 |
+|---|---|---|---|---|---|---|
+| 低 | 334 | 0.522 | 0.510 | 0.671 | +0.149 | +0.161 |
+| 中 | 333 | 0.564 | 0.561 | 0.677 | +0.114 | +0.116 |
+| 高 | 333 | 0.595 | 0.577 | 0.696 | +0.100 | +0.119 |
+
+## IoU 与杂乱度的相关（Spearman）
+
+| 模型 | ρ | p |
+|---|---|---|
+| dinov2 | +0.092 | 3.69e-03 |
+| dinov2_reg4 | +0.091 | 3.83e-03 |
+| dinov3 | +0.012 | 7.13e-01 |
+
+## 按鸟体大小分层（三等分）
+
+| 鸟体占比 | n | dinov2 IoU | dinov2_reg4 IoU | dinov3 IoU |
+|---|---|---|---|---|
+| 小 | 334 | 0.386 | 0.380 | 0.485 |
+| 中 | 333 | 0.588 | 0.580 | 0.749 |
+| 大 | 333 | 0.708 | 0.688 | 0.810 |
+图已保存 /Users/savo_shen/Projects/dinov3/experiments/outputs/bg_quant/plot_n1000_seed0.png
+报告 /Users/savo_shen/Projects/dinov3/experiments/outputs/bg_quant/report_n1000_seed0.md

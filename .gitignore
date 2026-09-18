@@ -1,0 +1,20 @@
+# 数据与权重不入库
+data/*
+!data/.gitkeep
+experiments/data/*
+!experiments/data/.gitkeep
+weights/*
+!weights/.gitkeep
+# 训练运行时产物（结果快照已在 results/ 下）
+/output/
+/logs/
+nohup_*.log
+wandb/
+# 特征缓存（300MB+）
+experiments/outputs/fgvc_bg/feats/
+*.joblib
+# 杂项
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/

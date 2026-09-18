@@ -1,0 +1,38 @@
+[nabirds] 48562 images, gt bbox: True
+/opt/anaconda3/envs/fal-wyh/lib/python3.9/site-packages/torchvision/transforms/transforms.py:329: UserWarning: Argument 'interpolation' of type int is deprecated since 0.13 and will be removed in 0.15. Please use InterpolationMode enum.
+  warnings.warn(
+  32/48562  13s
+  1632/48562  62s
+  3232/48562  110s
+  4832/48562  159s
+  6432/48562  207s
+  8032/48562  256s
+  9632/48562  304s
+  11232/48562  353s
+  12832/48562  402s
+  14432/48562  450s
+  16032/48562  497s
+  17632/48562  547s
+  19232/48562  596s
+  20832/48562  644s
+  22432/48562  691s
+  24032/48562  740s
+  25632/48562  788s
+  27232/48562  836s
+  28832/48562  883s
+  30432/48562  932s
+  32032/48562  980s
+  33632/48562  1028s
+  35232/48562  1076s
+  36832/48562  1126s
+  38432/48562  1175s
+  40032/48562  1224s
+  41632/48562  1272s
+  43232/48562  1322s
+  44832/48562  1371s
+  46432/48562  1419s
+  48032/48562  1468s
+  IoU(auto, gt) train: mean 0.789  >=0.5 0.962  n=23929
+  IoU(auto, gt) test: mean 0.789  >=0.5 0.961  n=24633
+  IoU(auto, gt) all:   mean 0.789  >=0.5 0.962
+[nabirds] done 48562 images in 1485s → /home/savo_shen/data_crops/nabirds

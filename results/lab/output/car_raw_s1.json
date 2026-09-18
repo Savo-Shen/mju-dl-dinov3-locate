@@ -1,0 +1,66 @@
+{
+ "name": "car_raw_s1",
+ "data_root": "/home/savo_shen/data_crops/car/raw",
+ "best": 0.8859594577788832,
+ "final": 0.8859594577788832,
+ "hist": [
+  [
+   1000,
+   0.3495833851511006
+  ],
+  [
+   2000,
+   0.6858599676657132
+  ],
+  [
+   3000,
+   0.7858475314015669
+  ],
+  [
+   4000,
+   0.8276333789329685
+  ],
+  [
+   5000,
+   0.851386643452307
+  ],
+  [
+   6000,
+   0.8673050615595075
+  ],
+  [
+   7000,
+   0.8721552045765452
+  ],
+  [
+   8000,
+   0.8842183807984082
+  ],
+  [
+   9000,
+   0.8848401940057207
+  ],
+  [
+   10000,
+   0.8859594577788832
+  ]
+ ],
+ "args": {
+  "data_root": "/home/savo_shen/data_crops/car/raw",
+  "name": "car_raw_s1",
+  "output_dir": "output",
+  "pretrained": "/home/savo_shen/Programs/FAL-ViT-main-wyh/imagenet21k_ViT-B_16.npz",
+  "img_size": 448,
+  "train_batch_size": 16,
+  "grad_accum": 1,
+  "eval_batch_size": 64,
+  "learning_rate": 0.03,
+  "weight_decay": 0.0,
+  "num_steps": 10000,
+  "warmup_steps": 500,
+  "eval_every": 1000,
+  "max_grad_norm": 1.0,
+  "num_workers": 8,
+  "seed": 1
+ }
+}
