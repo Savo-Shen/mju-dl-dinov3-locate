@@ -5,38 +5,34 @@
     open http://127.0.0.1:8000
 """
 
-import base64
-import io
 import sys
 import threading
-import time
 from pathlib import Path
 
-import numpy as np
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
+import io
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent / "scripts"))
+sys.path.insert(0, str(HERE))
+import features as ft  # noqa: E402
 import vitfeat as vf  # noqa: E402
 
 app = FastAPI(title="DINOv3 特征可视化")
 app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
 
 SAMPLES = HERE.parent / "data"
-DEVICE = vf.pick_device()
+DEVICE = ft.DEVICE
 _infer_lock = threading.Lock()   # MPS 不适合并发推理，串行化
 _status = {"ready": False, "loading": None, "error": None}
 
 
 def _warmup():
     try:
-        for k in vf.MODELS:
-            _status["loading"] = k
-            vf.load_model(k, DEVICE)
+        ft.load_all(lambda k: _status.__setitem__("loading", k))
         _status["ready"] = True
         _status["loading"] = None
     except Exception as e:  # noqa: BLE001
@@ -46,45 +42,9 @@ def _warmup():
 threading.Thread(target=_warmup, daemon=True).start()
 
 
-# ---------------------------------------------------------------- 工具
-def to_data_url(arr, size=320):
-    """(g,g,3) float 或 (g,g) bool → 放大后的 PNG data URL，最近邻放大保持 patch 边界清晰。"""
-    if arr.dtype == bool:
-        arr = np.stack([arr] * 3, -1).astype(np.uint8) * 255
-    else:
-        arr = (np.clip(arr, 0, 1) * 255).astype(np.uint8)
-    im = Image.fromarray(arr).resize((size, size), Image.NEAREST)
-    buf = io.BytesIO(); im.save(buf, "PNG")
-    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
-
-
-def img_data_url(img: Image.Image, size=320):
-    im = img.convert("RGB").resize((size, size), Image.BICUBIC)
-    buf = io.BytesIO(); im.save(buf, "JPEG", quality=88)
-    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
-
-
-def analyze_image(img: Image.Image, keys, grid):
-    out = {"original": img_data_url(img), "grid": grid, "models": []}
+def analyze_image(img, keys, grid):
     with _infer_lock:
-        for k in keys:
-            t0 = time.perf_counter()
-            model = vf.load_model(k, DEVICE)
-            feat, size = vf.extract(model, img, grid, DEVICE)
-            mask = vf.ncut_mask(feat)
-            out["models"].append({
-                "key": k,
-                "name": vf.MODELS[k],
-                "input_px": size,
-                "patch": model.patch_embed.patch_size[0],
-                "pca": to_data_url(vf.pca_rgb(feat)),
-                "mask": to_data_url(mask),
-                "fg_ratio": float(mask.mean()),
-                "smooth": vf.smoothness(feat),
-                "cos_med": vf.cos_median(feat),
-                "ms": int((time.perf_counter() - t0) * 1000),
-            })
-    return out
+        return ft.analyze_image(img, keys, grid)
 
 
 # ---------------------------------------------------------------- 路由

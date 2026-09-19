@@ -4,7 +4,7 @@
 
 | 子目录 | 内容 |
 |---|---|
-| `app/` | Web Demo：`bash experiments/app/run.sh` → http://127.0.0.1:8000。三模型（dinov2 / dinov2_reg4 / dinov3）并排的 PCA 着色图与前景 mask，可上传图片 |
+| `app/` | Web Demo：`bash experiments/app/run.sh` → http://127.0.0.1:8000。三模型（dinov2 / dinov2_reg4 / dinov3）并排的 PCA 着色图与前景 mask，可上传图片。核心逻辑在 `app/features.py`，`locate/demo/` 的合并版 Demo 把它作为页签② 复用 |
 | `scripts/` | 实验 01–03 的脚本，见 `scripts/README.md` |
 | `notes/` | 每个实验一份笔记：做法、数字、结论，以及方法上踩过的坑 |
 | `outputs/` | 实验产物：表（csv/md）、图、日志；300MB 的特征缓存（`fgvc_bg/feats/`）没有入库，重跑 `fgvc_bg.py extract` 可再生成 |

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DINOv3 找主体 → ViT 分类</title>
+<style>
+  :root { --bg:#f7f7f5; --panel:#fff; --line:#e4e4e0; --text:#1c1c1a; --muted:#6b6b66;
+          --primary:#185FA5; --accent:#0D7377; --warn:#B45309; --ok:#2b8a5a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.55 -apple-system,"PingFang SC","Noto Sans SC",sans-serif; }
+  header { padding:18px 32px 0; display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+  header h1 { margin:0; font-size:20px; font-weight:650; }
+  header .sub { color:var(--muted); font-size:13px; }
+  #status { margin-left:auto; font-size:12px; color:var(--muted); }
+  #status .dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#d0a000; margin-right:6px; vertical-align:middle; }
+  #status.ready .dot { background:var(--ok); } #status.error .dot { background:var(--warn); }
+  nav.tabs { display:flex; gap:4px; padding:12px 32px 0 300px; align-items:flex-end; }
+  nav.tabs button { border:1px solid var(--line); border-bottom:0; background:#eeeeea; color:var(--muted); padding:8px 16px; border-radius:8px 8px 0 0; font-size:13.5px; cursor:pointer; }
+  nav.tabs button.on { background:var(--panel); color:var(--text); font-weight:600; }
+  nav.tabs .help { margin-left:auto; border:1px solid var(--line); background:#fff; border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer; color:var(--primary); align-self:center; }
+  nav.tabs .help + .help { margin-left:6px; }
+  main { display:grid; grid-template-columns:250px 1fr; gap:18px; padding:0 32px 40px; margin-top:-1px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:0 10px 10px 10px; padding:16px; }
+  aside.panel { border-radius:10px; }
+  .panel h2 { margin:0 0 10px; font-size:12px; font-weight:600; color:var(--muted); letter-spacing:.05em; text-transform:uppercase; }
+  #drop { border:1.5px dashed #c8c8c2; border-radius:8px; padding:22px 12px; text-align:center; color:var(--muted); cursor:pointer; }
+  #drop.over { border-color:var(--primary); background:#eef3ff; color:var(--primary); }
+  #drop img { max-width:100%; max-height:200px; border-radius:6px; display:block; margin:0 auto 6px; }
+  #file { display:none; }
+  .samples { display:flex; flex-wrap:wrap; gap:5px; margin-top:12px; }
+  .samples .g { width:100%; font-size:11px; color:var(--muted); margin-top:6px; }
+  .samples button { border:1px solid var(--line); background:#fafaf8; border-radius:6px; padding:3px 8px; font-size:12px; cursor:pointer; }
+  .samples button:hover { border-color:var(--primary); color:var(--primary); }
+  .row { margin:12px 0 0; } .row label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
+  .chk label { display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text); margin:2px 0; }
+  input[type=range] { width:100%; }
+  button.go { width:100%; margin-top:14px; padding:10px; border:0; border-radius:8px; background:var(--primary); color:#fff; font-size:14px; font-weight:600; cursor:pointer; }
+  button.go:disabled { background:#b9c4e3; cursor:not-allowed; }
+  .note { margin-top:12px; font-size:12px; color:var(--muted); line-height:1.6; }
+  .empty { color:var(--muted); text-align:center; padding:140px 0; }
+  .err { color:var(--warn); padding:12px; background:#fff3ef; border-radius:8px; }
+
+  /* 页签① 分类 */
+  .stage { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .stage figure { margin:0; }
+  .stage img { width:100%; aspect-ratio:1; object-fit:contain; background:#111; border-radius:6px; border:1px solid var(--line); }
+  .stage figcaption { font-size:12px; margin-top:6px; }
+  .stage figcaption b { display:block; font-size:13px; }
+  .stage figcaption span { color:var(--muted); }
+  .stage figcaption a { color:var(--primary); cursor:pointer; font-size:11.5px; }
+  .arrow { text-align:center; color:var(--muted); font-size:12px; margin:12px 0 6px; }
+  .preds { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:6px; }
+  .pred { border:1px solid var(--line); border-radius:8px; padding:12px 14px; background:#fafaf8; }
+  .pred.raw { border-top:3px solid #9aa3ad; } .pred.crop { border-top:3px solid var(--primary); } .pred.tok { border-top:3px solid var(--accent); }
+  .pred h3 { margin:0; font-size:14px; } .pred h3 small { display:block; color:var(--muted); font-weight:400; font-size:11.5px; margin-top:2px; }
+  .pred .ms { float:right; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .bar { margin-top:8px; font-size:12.5px; }
+  .bar .row { display:grid; grid-template-columns:1fr 46px; align-items:center; gap:8px; margin:4px 0; }
+  .bar .name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar .track { grid-column:1 / span 2; height:6px; background:#e9e9e5; border-radius:3px; overflow:hidden; }
+  .bar .fill { height:100%; background:#9aa3ad; } .crop .fill { background:var(--primary); } .tok .fill { background:var(--accent); }
+  .bar .p { text-align:right; font-variant-numeric:tabular-nums; color:var(--muted); }
+  .bar .row.top .name { font-weight:650; color:var(--text); }
+  .agree { margin-top:10px; font-size:12px; color:var(--muted); }
+  .agree b { color:var(--ok); } .agree b.diff { color:var(--warn); }
+
+  /* 页签② 特征 */
+  .grid { display:grid; gap:14px; }
+  .col { display:flex; flex-direction:column; gap:8px; }
+  .col h3 { margin:0; font-size:13px; font-weight:600; } .col h3 small { display:block; color:var(--muted); font-weight:400; font-size:11px; }
+  .col img { width:100%; aspect-ratio:1; border-radius:6px; border:1px solid var(--line); image-rendering:pixelated; background:#eee; }
+  .col .cap { font-size:11px; color:var(--muted); margin-top:-4px; }
+  .metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+  .m { background:#fafaf8; border:1px solid var(--line); border-radius:6px; padding:6px 8px; }
+  .m b { display:block; font-size:15px; font-variant-numeric:tabular-nums; } .m span { font-size:10.5px; color:var(--muted); }
+  .m.best { border-color:var(--ok); background:#eef8f2; }
+
+  /* 说明弹窗 */
+  dialog { border:0; border-radius:12px; padding:0; max-width:760px; width:92vw; box-shadow:0 20px 60px rgba(0,0,0,.18); }
+  dialog::backdrop { background:rgba(20,20,20,.35); }
+  .helpbox { padding:22px 26px 26px; font-size:13.5px; line-height:1.7; max-height:84vh; overflow:auto; }
+  .helpbox h2 { margin:0 0 4px; font-size:17px; } .helpbox h3 { margin:18px 0 6px; font-size:14px; color:var(--primary); }
+  .helpbox p { margin:6px 0; } .helpbox ol, .helpbox ul { margin:4px 0 6px 1.2em; padding:0; } .helpbox li { margin:3px 0; }
+  .helpbox .one { background:#eef3ff; border-left:3px solid var(--primary); padding:8px 12px; border-radius:6px; margin:8px 0; }
+  .helpbox .no { background:#fff3ef; border-left:3px solid var(--warn); padding:8px 12px; border-radius:6px; margin:8px 0; }
+  .helpbox table { border-collapse:collapse; font-size:12.5px; margin:6px 0; }
+  .helpbox th, .helpbox td { border:1px solid var(--line); padding:4px 10px; text-align:left; vertical-align:top; } .helpbox th { background:#fafaf8; }
+  .helpbox .close { float:right; border:0; background:transparent; font-size:18px; cursor:pointer; color:var(--muted); }
+  .helpbox code { background:#f1f1ee; padding:1px 5px; border-radius:4px; font-size:12.5px; }
+  .helpbox svg { width:100%; height:auto; margin:6px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>DINOv3 找主体 → ViT 分类</h1>
+  <span class="sub">一张图，两个页签：先看它把主体找到哪，再看三种看图方式各认成什么</span>
+  <span id="status"><span class="dot"></span><span id="status-text">连接中…</span></span>
+</header>
+<nav class="tabs">
+  <button class="on" data-tab="cls">① 找主体 → 分类</button>
+  <button data-tab="feat">② 三个冻结 ViT 在看什么</button>
+  <button class="help" onclick="document.getElementById('help-attn').showModal()">DINOv3 的注意力图是怎么来的？</button>
+  <button class="help" onclick="document.getElementById('help-feat').showModal()">页签② 的图怎么看？</button>
+</nav>
+<main>
+  <aside class="panel">
+    <h2>输入</h2>
+    <input id="file" type="file" accept="image/*">
+    <div id="drop"><div>拖一张图进来、点击选择，或直接粘贴</div></div>
+    <div class="samples" id="samples"></div>
+    <div class="row">
+      <label>页签② 的模型 / patch 网格 <span id="gridv">32 × 32</span></label>
+      <div class="chk">
+        <label><input type="checkbox" name="m" value="dinov2" checked> DINOv2</label>
+        <label><input type="checkbox" name="m" value="dinov2_reg4" checked> DINOv2 + reg4</label>
+        <label><input type="checkbox" name="m" value="dinov3" checked> DINOv3</label>
+      </div>
+      <input id="grid" type="range" min="16" max="40" step="4" value="32">
+    </div>
+    <button class="go" id="go" disabled>分析</button>
+    <div class="note">
+      <b>页签①</b>：DINOv3 不用标注框出主体；三个 NABirds（555 类）上微调的 ViT-B/16 分别看原图、裁剪图、25% 的 token。<br>
+      <b>页签②</b>：三代冻结的 ViT-S 的 patch 特征长什么样、能不能自己圈出主体。<br>
+      两个页签用同一张图，点一次"分析"都会算。
+    </div>
+  </aside>
+  <section class="panel" id="results">
+    <div id="tab-cls"><div class="empty">选一张图，看三种方式分别认成了什么</div></div>
+    <div id="tab-feat" hidden><div class="empty">选一张图，看三个模型各自「看到」了什么</div></div>
+  </section>
+</main>
+
+<dialog id="help-attn"><div class="helpbox">
+  <button class="close" onclick="document.getElementById('help-attn').close()">✕</button>
+  <h2>DINOv3 的 CLS 注意力图是怎么来的</h2>
+  <p style="color:var(--muted)">页签① 的热图、红框和"25% token"用的都是它。它不是分割模型的输出，只是把 ViT 内部本来就有的一个量画了出来。</p>
+
+  <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, PingFang SC, sans-serif" font-size="12">
+    <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#999"/></marker></defs>
+    <rect x="10" y="20" width="110" height="80" rx="6" fill="#eef3ff" stroke="#185FA5"/>
+    <text x="65" y="45" text-anchor="middle" fill="#185FA5" font-weight="600">448×448 图</text>
+    <text x="65" y="65" text-anchor="middle" fill="#555">切成 28×28</text>
+    <text x="65" y="82" text-anchor="middle" fill="#555">= 784 个 patch</text>
+    <path d="M122 60 L160 60" stroke="#999" marker-end="url(#a)"/>
+    <text x="287" y="30" fill="#555">token 序列（12 层 Transformer 一路带到最后）</text>
+    <rect x="165" y="42" width="44" height="36" rx="4" fill="#0D7377"/><text x="187" y="64" text-anchor="middle" fill="#fff" font-weight="600">CLS</text>
+    <rect x="213" y="42" width="52" height="36" rx="4" fill="#c9ced4"/><text x="239" y="64" text-anchor="middle" fill="#333">reg ×4</text>
+    <rect x="269" y="42" width="30" height="36" rx="4" fill="#fff" stroke="#999"/><text x="284" y="64" text-anchor="middle">p₁</text>
+    <rect x="303" y="42" width="30" height="36" rx="4" fill="#fff" stroke="#999"/><text x="318" y="64" text-anchor="middle">p₂</text>
+    <text x="352" y="64" text-anchor="middle" fill="#777">…</text>
+    <rect x="370" y="42" width="38" height="36" rx="4" fill="#fff" stroke="#999"/><text x="389" y="64" text-anchor="middle">p₇₈₄</text>
+    <path d="M187 80 C187 120 284 100 284 120" stroke="#0D7377" fill="none" stroke-width="1.5"/>
+    <path d="M187 80 C187 125 318 105 318 120" stroke="#0D7377" fill="none" stroke-width="1.5"/>
+    <path d="M187 80 C187 135 389 110 389 120" stroke="#0D7377" fill="none" stroke-width="1.5"/>
+    <text x="300" y="148" text-anchor="middle" fill="#0D7377" font-weight="600">最后一层：CLS 的 query · 每个 patch 的 key → softmax</text>
+    <text x="300" y="166" text-anchor="middle" fill="#555">784 个权重，加起来 = 1，12 个头取平均</text>
+    <path d="M425 60 L460 60" stroke="#999" marker-end="url(#a)"/>
+    <g transform="translate(470,22)">
+      <rect width="80" height="80" rx="4" fill="#111"/>
+      <rect x="20" y="14" width="42" height="44" rx="14" fill="#ff5a00" opacity=".35"/>
+      <rect x="28" y="20" width="26" height="30" rx="8" fill="#ffb300" opacity=".9"/>
+      <text x="40" y="98" text-anchor="middle" fill="#555">排回 28×28</text>
+    </g>
+    <path d="M560 60 L595 60" stroke="#999" marker-end="url(#a)"/>
+    <g transform="translate(605,22)">
+      <rect width="145" height="80" rx="6" fill="#fafaf8" stroke="#e4e4e0"/>
+      <text x="72" y="22" text-anchor="middle" fill="#185FA5" font-weight="600">三种用法</text>
+      <text x="10" y="42" fill="#333">阈值 0.07 → 最大连通块 → 框</text>
+      <text x="10" y="58" fill="#333">取最高的 25% patch → token</text>
+      <text x="10" y="74" fill="#333">直接画出来 → 热图</text>
+    </g>
+  </svg>
+
+  <h3>1. CLS token 是什么</h3>
+  <p>ViT 把图切成 784 个 patch，每个变成一个 token；序列最前面再拼一个不对应任何像素的 <b>CLS token</b>，它的任务是把全图"汇总"成一个向量，分类头就接在它上面（DINOv3 还多拼了 4 个 register token，作用见第 4 条）。</p>
+
+  <h3>2. 注意力权重本来就在那里</h3>
+  <p>Transformer 每一层里，每个 token 都算出 query、key、value 三个向量；token i 对 token j 的注意力 = <code>softmax_j(q_i · k_j / √d)</code>。<b>CLS 那一行</b>就是"CLS 在汇总全图时从每个 patch 拿了多少"——784 个非负数，加起来正好是 1。</p>
+  <div class="one"><b>我们做的只是：取最后一层、12 个注意力头取平均、去掉 CLS 和 register 自己那几列，把剩下的 784 个数排回 28×28。</b>再做一次 3×3 平滑、按最大值归一化，就是页签① 的热图。代码在 <code>locate/dino_attn.py</code>，四十来行。</div>
+
+  <h3>3. 为什么它亮的地方就是主体</h3>
+  <p>CLS 要给出一个能代表"这张图是什么"的向量。DINO 的训练方式（学生只看一小块裁剪、老师看整图，要求两边输出一致）逼着它把权重放在决定类别的地方——对细粒度图片来说就是那只鸟，而不是树枝和天空。没有任何标注告诉过它"鸟"在哪，这是训练目标的副产品。</p>
+
+  <h3>4. 为什么 DINOv3 的图特别干净：register</h3>
+  <p>老版本 ViT 有个毛病：训练久了会把几个背景 patch 当"草稿纸"，往里堆很大范数的全局信息，CLS 的注意力被这几个 patch 大量吸走（attention sink），热图上出现和内容无关的亮点。DINOv3（以及 DINOv2 + reg4）额外加了 4 个 <b>register token</b> 专门当草稿纸，patch 就不用再背这个包袱，CLS 的注意力只剩真正的内容。页签② 里 DINOv2 的 PCA 图背景有椒盐碎点、DINOv3 没有，是同一件事的另一种表现。</p>
+
+  <h3>5. 和页签② 的黑白 mask 有什么区别</h3>
+  <table>
+    <tr><th></th><th>CLS 注意力（页签①）</th><th>NCut 前景 mask（页签②）</th></tr>
+    <tr><td>看的是</td><td>一个 token（CLS）的视角：它在看哪</td><td>patch 之间谁和谁像：在相似度图上切一刀</td></tr>
+    <tr><td>怎么算</td><td>一次前向顺手就有，几乎免费</td><td>要解一个 N×N 的特征值问题</td></tr>
+    <tr><td>倾向</td><td>亮在最有判别力的部位（头、翅斑），松一点的框刚好包住整只鸟</td><td>圈出内部最一致的一整团，边界更贴</td></tr>
+    <tr><td>我们用它做</td><td>找框（与官方 bbox 的 IoU ≈ 0.8）、挑 token</td><td>展示特征质量、算与官方分割 mask 的 IoU</td></tr>
+  </table>
+  <div class="no"><b>它不是分割，也不会永远对。</b>画面里有比鸟更"显眼"的东西（一朵花、一辆卡车、一只松鼠）时，注意力会被带走，框就错了——NABirds 里约 4% 的图是这样。</div>
+</div></dialog>
+
+<dialog id="help-feat"><div class="helpbox">
+  <button class="close" onclick="document.getElementById('help-feat').close()">✕</button>
+  <h2>页签② 的图怎么看</h2>
+  <p style="color:var(--muted)">ViT 把图切成 N×N 个小方块（patch），每块输出一个 384 维向量，意思是「这一块是什么」。下面两张图都是从这些向量算出来的。</p>
+  <h3>彩色图：模型给每一小块打的「标签」</h3>
+  <p>384 维画不出来，用 PCA 找方差最大的 3 个方向当 R、G、B。</p>
+  <div class="one"><b>读法只有一条：颜色相近 = 特征相近 = 模型认为这两块是同一类东西。</b></div>
+  <ul>
+    <li>颜色本身没意义——每个模型自己做 PCA，DINOv2 的紫和 DINOv3 的绿<b>不能对着比</b>。要看的是<b>边界干不干净、同一物体内部颜色统不统一</b>。</li>
+    <li>背景里的椒盐碎点 = 相邻两块明明是同一个东西，特征却差很多。这就是「邻域相似度」低在图上的样子。</li>
+  </ul>
+  <h3>黑白图：模型自己圈出的「主体」</h3>
+  <div class="one"><b>白色 = 在模型特征看来自身最一致、和其余部分最不像、又不贴着画面边缘的那一团。</b>全程没有任何标注。</div>
+  <p>算法叫 Normalized Cut（Shi &amp; Malik 2000；用在 DINO 特征上是 TokenCut, CVPR 2022）：每个 patch 是一个点，两点之间的边 = 特征余弦相似度；找一条切断边最细的线把点分成两组，并用「切断的 ÷ 各组自己的总连接」惩罚太小的块；精确解是 NP-hard，实际解特征值问题 (D − W)v = λDv 取第二小特征向量的符号；两组里碰画面边界少的算前景。</p>
+  <h3>数字</h3>
+  <table>
+    <tr><th>邻域相似度</th><td>每个 patch 和上下左右邻居的平均余弦相似度。越高特征越平滑，彩色图里碎点越少。</td></tr>
+    <tr><th>cos 相似度中位数</th><td>全图 patch 两两有多像。DINOv2 ≈ 0.2、DINOv3 ≈ 0.6——所以 NCut 的阈值必须按每张图自适应（取中位数）。</td></tr>
+    <tr><th>前景占比</th><td>白色块占全图比例。一只小鸟占 60% 肯定是切错了。</td></tr>
+  </table>
+  <div class="no"><b>不是「DINO 认为这块是主体」</b>——DINO 只提供「谁和谁像」这张网，圈哪块是 NCut 决定的。<b>不是「最特别的」</b>，也<b>不是「面积最大的」</b>。只切一刀，多个物体会合并或只留一个；小目标 patch 太少会吃亏。</div>
+</div></dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+let blob = null;
+document.querySelectorAll('nav.tabs button[data-tab]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav.tabs button[data-tab]').forEach(x => x.classList.toggle('on', x === b));
+  $('#tab-cls').hidden = b.dataset.tab !== 'cls'; $('#tab-feat').hidden = b.dataset.tab !== 'feat';
+});
+async function poll() {
+  try {
+    const s = await (await fetch('/api/status')).json();
+    const el = $('#status');
+    if (s.error) { el.className = 'error'; $('#status-text').textContent = '加载失败：' + s.error; return; }
+    if (s.ready) { el.className = 'ready'; $('#status-text').textContent = `就绪 · ${s.device} · NABirds ${s.classes} 类`; $('#go').disabled = !blob; return; }
+    $('#status-text').textContent = '加载模型：' + (s.loading || '…');
+  } catch { $('#status-text').textContent = '连接中…'; }
+  setTimeout(poll, 800);
+}
+poll();
+fetch('/api/samples').then(r => r.json()).then(list => {
+  const box = $('#samples'); let g = null;
+  list.forEach(s => {
+    if (s.group !== g) { g = s.group; const t = document.createElement('div'); t.className = 'g';
+      t.textContent = g === 'demo_samples' ? 'NABirds 测试集（编号_鸟名_主体占比）' : '其他示例'; box.appendChild(t); }
+    const b = document.createElement('button'); b.textContent = s.name;
+    b.onclick = async () => setImage(await (await fetch(s.url)).blob()); box.appendChild(b);
+  });
+});
+function setImage(b) { blob = b; $('#drop').innerHTML = `<img src="${URL.createObjectURL(b)}">`; $('#go').disabled = !$('#status').classList.contains('ready'); }
+const drop = $('#drop');
+drop.onclick = () => $('#file').click();
+$('#file').onchange = e => e.target.files[0] && setImage(e.target.files[0]);
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); e.dataTransfer.files[0] && setImage(e.dataTransfer.files[0]); };
+document.onpaste = e => { const f = [...e.clipboardData.files][0]; f && setImage(f); };
+$('#grid').oninput = e => $('#gridv').textContent = `${e.target.value} × ${e.target.value}`;
+
+$('#go').onclick = async () => {
+  $('#go').disabled = true; $('#go').textContent = '推理中…';
+  $('#tab-cls').innerHTML = '<div class="empty">找主体、分类中…</div>'; $('#tab-feat').innerHTML = '<div class="empty">提取特征中…</div>';
+  const fd1 = new FormData(); fd1.append('file', blob, 'img.jpg');
+  try { const r = await fetch('/api/classify', { method: 'POST', body: fd1 });
+    if (!r.ok) throw new Error((await r.json()).detail || r.status); renderCls(await r.json()); }
+  catch (e) { $('#tab-cls').innerHTML = `<div class="err">${e.message}</div>`; }
+  const keys = [...document.querySelectorAll('input[name=m]:checked')].map(i => i.value);
+  const fd2 = new FormData(); fd2.append('file', blob, 'img.jpg'); fd2.append('models', keys.join(',')); fd2.append('grid', $('#grid').value);
+  try { const r = await fetch('/api/analyze', { method: 'POST', body: fd2 });
+    if (!r.ok) throw new Error((await r.json()).detail || r.status); renderFeat(await r.json()); }
+  catch (e) { $('#tab-feat').innerHTML = `<div class="err">${e.message}</div>`; }
+  $('#go').disabled = false; $('#go').textContent = '分析';
+};
+
+function bars(list) {
+  return '<div class="bar">' + list.map((x, i) =>
+    `<div class="row${i === 0 ? ' top' : ''}"><span class="name" title="${x.name}">${x.name}</span><span class="p">${(x.p * 100).toFixed(1)}%</span>
+     <div class="track"><div class="fill" style="width:${(x.p * 100).toFixed(1)}%"></div></div></div>`).join('') + '</div>';
+}
+function renderCls(d) {
+  const im = d.images, p = d.preds, ms = d.ms;
+  const top = k => p[k] ? p[k][0].name : null;
+  const col = (k, cls, title, sub) => p[k]
+    ? `<div class="pred ${cls}"><span class="ms">${ms[k]} ms</span><h3>${title}<small>${sub}</small></h3>${bars(p[k])}
+       <div class="agree">与原图 top-1 ${top('raw') === top(k) ? '<b>一致</b>' : '<b class="diff">不同</b>'}</div></div>`
+    : `<div class="pred ${cls}"><h3>${title}<small>${sub}</small></h3><div class="agree">权重未就绪（weights/ 里没有对应的 .pt）</div></div>`;
+  $('#tab-cls').innerHTML = `
+    <div class="stage">
+      <figure><img src="${im.boxed}"><figcaption><b>① 原图 + DINOv3 自动框</b><span>主体占图 ${(d.box_frac * 100).toFixed(0)}% · 找框 ${ms.find} ms</span></figcaption></figure>
+      <figure><img src="${im.heat}"><figcaption><b>DINOv3 CLS 注意力</b><span>越亮越"像主体"，没有用任何标注 · </span><a onclick="document.getElementById('help-attn').showModal()">怎么来的？</a></figcaption></figure>
+      <figure><img src="${im.crop}"><figcaption><b>② 裁剪放大后送入 ViT</b><span>正方形框 + 15% 上下文</span></figcaption></figure>
+      <figure><img src="${im.tokens}"><figcaption><b>③ ViT 实际看到的 token</b><span>只保留 ${d.tokens[0]} / ${d.tokens[1]} 个 patch，其余变暗</span></figcaption></figure>
+    </div>
+    <div class="arrow">▼ 三个 ViT-B/16 的 top-5 预测</div>
+    <div class="preds">
+      <div class="pred raw"><span class="ms">${ms.raw} ms</span><h3>原图<small>看整张图 · 784 token</small></h3>${bars(p.raw)}</div>
+      ${col('crop', 'crop', 'DINOv3 裁剪', '先找再放大 · 784 token')}
+      ${col('tok', 'tok', '只看 25% token', `DINOv3 挑 · ${d.tokens[0]} token（含打分耗时）`)}
+    </div>`;
+}
+const LABEL = { dinov2: 'DINOv2', dinov2_reg4: 'DINOv2 + reg4', dinov3: 'DINOv3' };
+function renderFeat(d) {
+  const bestSmooth = Math.max(...d.models.map(m => m.smooth));
+  const cols = d.models.map(m => `
+    <div class="col">
+      <h3>${LABEL[m.key]}<small>${m.name} · ${m.input_px}px / patch${m.patch} · ${m.ms} ms</small></h3>
+      <img src="${m.pca}" alt="PCA"><div class="cap">前三主成分 → RGB（颜色相近 = 特征相近）</div>
+      <img src="${m.mask}" alt="mask"><div class="cap">NCut 前景 mask · 前景占 ${(m.fg_ratio * 100).toFixed(0)}%</div>
+      <div class="metrics">
+        <div class="m ${m.smooth === bestSmooth ? 'best' : ''}"><b>${m.smooth.toFixed(3)}</b><span>邻域相似度 ↑</span></div>
+        <div class="m"><b>${m.cos_med.toFixed(2)}</b><span>cos 相似度中位数</span></div>
+        <div class="m"><b>${d.grid}²</b><span>patch 数</span></div>
+      </div>
+    </div>`).join('');
+  $('#tab-feat').innerHTML = `
+    <div class="grid" style="grid-template-columns: 180px repeat(${d.models.length}, 1fr)">
+      <div class="col"><h3>原图<small>送入网络前统一缩放为正方形</small></h3><img src="${d.original}" style="image-rendering:auto"></div>
+      ${cols}
+    </div>
+    <div class="note"><b>怎么看：</b>PCA 图里颜色相近的 patch 特征相近；背景里的椒盐噪点对应「邻域相似度」低。mask 是不看任何标注、只在 patch 相似度图上做 Normalized Cut 切出来的前景。绿色高亮 = 该指标在本次对比中最好。详细说明点上方"页签② 的图怎么看？"。</div>`;
+}
+</script>
+</body>
+</html>

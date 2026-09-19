@@ -105,6 +105,7 @@ def main():
     ap.add_argument("--max_grad_norm", type=float, default=1.0)
     ap.add_argument("--num_workers", type=int, default=8)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--save_ckpt", action="store_true", help="每次刷新 best 时把 ViT 权重存为 fp16 到 output/<name>.pt（约 170MB），供 Demo 推理")
     args = ap.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -155,6 +156,8 @@ def main():
                 acc, preds = evaluate(model, el, dev)
                 if acc > best:
                     best, best_preds = acc, preds
+                    if args.save_ckpt:
+                        torch.save({k: v.half() for k, v in model.state_dict().items()}, os.path.join(args.output_dir, f"{args.name}.pt"))
                 hist.append((step, acc))
                 logger.info("Validation Results step %d: Accuracy %.5f (best %.5f)", step, acc, best)
             if step >= args.num_steps:

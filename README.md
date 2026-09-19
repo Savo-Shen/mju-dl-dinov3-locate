@@ -39,7 +39,8 @@ mju-dl-dinov3-locate/
 │   ├── analyze_size.py        #   按主体大小分组看准确率
 │   ├── viz_boxes.py           #   抽样画框（红 = 自动，青 = 官方）
 │   ├── nabirds_cases.py       #   "原图错、裁剪对" 的案例图
-│   └── dino_attn.py           #   从冻结的 DINOv3 里读 CLS→patch 注意力（找框 / 挑 token 的分数来源）
+│   ├── dino_attn.py           #   从冻结的 DINOv3 里读 CLS→patch 注意力（找框 / 挑 token 的分数来源）
+│   └── demo/                  #   现场演示：上传一张图 → 找框 → 原图 / 裁剪 / 25% token 三个 ViT 并排预测
 ├── experiments/               # Mac 本机：Demo + 前置实验（保持原目录布局，脚本按 experiments/ 相对路径找数据）
 │   ├── app/                   #   Web Demo：三模型并排 PCA 着色 + 前景 mask
 │   ├── scripts/               #   实验 01–03 脚本（PCA 可视化 / 1000 张前景 IoU / 冻结特征线性探针）
@@ -100,7 +101,7 @@ conda activate dinov3 && export HF_ENDPOINT=https://hf-mirror.com
 bash experiments/app/run.sh            # → http://127.0.0.1:8000，首次会下载三个 ViT-S 权重，之后单图约 1.5 s（M1 Max）
 ```
 
-Demo 里并排比较 `dinov2`（ViT-S/14, 448）、`dinov2_reg4`（+4 register）、`dinov3`（ViT-S/16, 512）：PCA 着色图（同色 = 特征相近）和自动前景 mask，可上传自己的图片。
+（这个特征 Demo 也作为页签② 合并进了 §6.1 的演示页面，课堂上用后者即可。）Demo 里并排比较 `dinov2`（ViT-S/14, 448）、`dinov2_reg4`（+4 register）、`dinov3`（ViT-S/16, 512）：PCA 着色图（同色 = 特征相近）和自动前景 mask，可上传自己的图片。
 
 前置实验（笔记在 `experiments/notes/`，产物在 `experiments/outputs/`）：
 
@@ -147,7 +148,7 @@ for v in raw dinov3_sq gt_sq; do
 done
 ```
 
-配方沿用 TransFG 的纯 ViT 基线：Resize 600 → RandomCrop 448 + 水平翻转，SGD lr 3e-2 momentum 0.9，warmup 500 步 + cosine，10k 步，batch 16，fp16。12GB 显卡用 `--train_batch_size 8 --grad_accum 2`。单个 run 3090 上约 1 小时（NABirds / IP102 测试集大，约 1.5 小时）。输出 `output/<name>.json`（best 与每千步曲线）和 `output/<name>_preds.npz`（最佳一轮的逐图预测）。
+配方沿用 TransFG 的纯 ViT 基线：Resize 600 → RandomCrop 448 + 水平翻转，SGD lr 3e-2 momentum 0.9，warmup 500 步 + cosine，10k 步，batch 16，fp16。12GB 显卡用 `--train_batch_size 8 --grad_accum 2`。单个 run 3090 上约 1 小时（NABirds / IP102 测试集大，约 1.5 小时）。输出 `output/<name>.json`（best 与每千步曲线）和 `output/<name>_preds.npz`（最佳一轮的逐图预测）；加 `--save_ckpt` 会把最佳权重存成 `output/<name>.pt`（fp16，约 170MB），演示要用。
 
 ### 5.3 按主体大小分组
 
@@ -192,6 +193,15 @@ python locate/train_vit_tok.py --data_root data/crops/cub/raw --name cub_tok25_8
 | 25%，输入 896 | DINOv3 | 90.27 | 90.51 |
 
 "看得少"不掉分，"看错地方"才掉。896 + 挑 25%（token 数与 448 全图相同）在 NABirds 上 +0.7，但不如直接裁剪的 +1.4——放大的收益裁剪已经拿到，挑散点反而漏边缘和上下文，这是一个诚实的负结果。
+
+### 6.1 现场演示
+
+```bash
+conda activate dinov3 && export HF_ENDPOINT=https://hf-mirror.com
+python locate/demo/server.py        # → http://127.0.0.1:8001
+```
+
+一个页面两个页签：**① 找主体 → 分类**（DINOv3 的注意力与自动框 → 裁剪图 → 三个 NABirds 分类器的 top-5 与耗时）和 **② 三个冻结 ViT 在看什么**（§4 的特征对比 Demo 合并进来了）。右上角有"DINOv3 的注意力图是怎么来的？"的图解说明。需要 `weights/` 下三个微调权重（训练时加 `--save_ckpt` 即得，见 `locate/demo/README.md`）。M1 Max 上一张图约 0.2 秒。
 
 ## 7. 结果总表
 
