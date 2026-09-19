@@ -173,7 +173,8 @@
   </svg>
 
   <h3>1. CLS token 是什么</h3>
-  <p>ViT 把图切成 784 个 patch，每个变成一个 token；序列最前面再拼一个不对应任何像素的 <b>CLS token</b>，它的任务是把全图"汇总"成一个向量，分类头就接在它上面（DINOv3 还多拼了 4 个 register token，作用见第 4 条）。</p>
+  <p>ViT 把图切成 784 个 patch，每个变成一个 token；序列最前面再拼一个不对应任何像素的 <b>CLS token</b>，它的任务是把全图"汇总"成一个向量，输出头就接在它上面（DINOv3 还多拼了 4 个 register token，作用见第 4 条）。</p>
+  <div class="one"><b>这里的 CLS 是 DINOv3 自己的。</b>整条流程有两个 ViT：冻结的 DINOv3（定位器，从没见过 NABirds 的标签）和我们在 NABirds 上微调的 ViT-B/16（分类器）。热图、框、挑 token 用的全是前者内部的注意力；分类器只负责接收裁剪图或被挑出的 token，它自己的注意力不参与。</div>
 
   <h3>2. 注意力权重本来就在那里</h3>
   <p>Transformer 每一层里，每个 token 都算出 query、key、value 三个向量；token i 对 token j 的注意力 = <code>softmax_j(q_i · k_j / √d)</code>。<b>CLS 那一行</b>就是"CLS 在汇总全图时从每个 patch 拿了多少"——784 个非负数，加起来正好是 1。</p>
